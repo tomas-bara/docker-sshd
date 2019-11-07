@@ -16,6 +16,8 @@ VOLUME /root
 
 COPY ./entrypoint.sh ./entrypoint.sh
 
+WORKDIR /root
+
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD [ "/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config" ]
