@@ -36,6 +36,8 @@ if [ ! -f "/root/.ssh/authorized_keys" ]; then
 		fi
 fi
 
+echo "" > "/etc/motd"
+
 stop() {
     PID=$(cat "/var/run/sshd.pid")
     kill -SIGTERM "${PID}"
