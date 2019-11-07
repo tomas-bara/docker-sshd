@@ -2,25 +2,29 @@
 
 set -e
 
-for KEY_TYPE in "dsa" "rsa" "ecdsa" "ed25519"; do
-		if [ -f "/etc/ssh/ssh_host_${KEY_TYPE}_key" ]; then
-				rm "/etc/ssh/ssh_host_${KEY_TYPE}_key"
-		fi
-done
+if [ ! -f "/etc/ssh/sshd_config" ]; then
+		mv /etc/ssh.dist/* "/etc/ssh/"
 
-ssh-keygen -A
+		for KEY_TYPE in "dsa" "rsa" "ecdsa" "ed25519"; do
+				if [ -f "/etc/ssh/ssh_host_${KEY_TYPE}_key" ]; then
+						rm "/etc/ssh/ssh_host_${KEY_TYPE}_key"
+				fi
+		done
 
-echo >> "/etc/ssh/sshd_config"
-echo "Port 22" >> "/etc/ssh/sshd_config"
-echo "AddressFamily inet" >> "/etc/ssh/sshd_config"
-echo "ListenAddress 0.0.0.0" >> "/etc/ssh/sshd_config"
-echo "HostKey /etc/ssh/ssh_host_dsa_key" >> "/etc/ssh/sshd_config" && \
-echo "HostKey /etc/ssh/ssh_host_rsa_key" >> "/etc/ssh/sshd_config" && \
-echo "HostKey /etc/ssh/ssh_host_ecdsa_key" >> "/etc/ssh/sshd_config" && \
-echo "HostKey /etc/ssh/ssh_host_ed25519_key" >> "/etc/ssh/sshd_config" && \
-echo "PermitRootLogin yes" >> "/etc/ssh/sshd_config" && \
-echo "PasswordAuthentication no" >> "/etc/ssh/sshd_config" && \
-echo "PubkeyAuthentication yes" >> "/etc/ssh/sshd_config" && \
+		ssh-keygen -A
+
+		echo >> "/etc/ssh/sshd_config"
+		echo "Port 22" >> "/etc/ssh/sshd_config"
+		echo "AddressFamily inet" >> "/etc/ssh/sshd_config"
+		echo "ListenAddress 0.0.0.0" >> "/etc/ssh/sshd_config"
+		echo "HostKey /etc/ssh/ssh_host_dsa_key" >> "/etc/ssh/sshd_config"
+		echo "HostKey /etc/ssh/ssh_host_rsa_key" >> "/etc/ssh/sshd_config"
+		echo "HostKey /etc/ssh/ssh_host_ecdsa_key" >> "/etc/ssh/sshd_config"
+		echo "HostKey /etc/ssh/ssh_host_ed25519_key" >> "/etc/ssh/sshd_config"
+		echo "PermitRootLogin yes" >> "/etc/ssh/sshd_config"
+		echo "PasswordAuthentication no" >> "/etc/ssh/sshd_config"
+		echo "PubkeyAuthentication yes" >> "/etc/ssh/sshd_config"
+fi
 
 echo "root:root" | chpasswd
 usermod --shell /bin/bash root
@@ -45,6 +49,7 @@ stop() {
 }
 
 trap stop SIGINT SIGTERM
+echo "> ${@}"
 $@ &
 PID="$!"
 echo "${PID}" > "/var/run/sshd.pid"
